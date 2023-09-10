@@ -5,11 +5,12 @@ from giftshop import Dollar
 class ClockInOutBoard(Item):
     def __init__(self, name="Clock In or Out"):
         super().__init__(name)
+        self.clocked_in_checked = False
         self.clock_in_num = 0
         self.clock_in_order = [
             "Hank Little",
             "Barbara James",
-            "Chunk Huitt",
+            "Chuck Huitt",
             "Emily Johnson"
         ]
         self.clocked_in = {
@@ -28,15 +29,17 @@ class ClockInOutBoard(Item):
     def get_options(self) -> list[(typing.Union[str, typing.Callable[[], None]], str)]:
         options = []
         options.append((lambda: self.status(), "Who is clocked in or out?"))
-        if not self.world.rooms["Breakroom"].left_unlocked:
+        if self.clocked_in_checked and not self.world.rooms["Breakroom"].left_unlocked:
             options.append((lambda: self.clock_in(), "Clock someone in."))
         return options
 
     def status(self):
-        message = "You look at the board and can see that:\n"
+        self.clocked_in_checked = True
+        message = "You look at the board and can see that:"
         for employee in self.clocked_in.keys():
-            message = " -- " + employee + " is clocked " + ("in" if self.clocked_in[employee] else "out")
+            message += "\n -- " + employee + " is clocked " + ("in" if self.clocked_in[employee] else "out")
         self.send_message(message)
+
     def clock_in(self):
         options = []
         for employee in self.clocked_in.keys():
@@ -51,12 +54,12 @@ class ClockInOutBoard(Item):
                 self.world.rooms["Breakroom"].left_unlocked = True
                 self.send_message("\n<YOU HEAR LOAD CLICK TO THE LEFT>")
         else:
-            self.clock_in_num = 0
             for employee in self.clocked_in.keys():
                 self.clocked_in[employee] = False
             message = "You try to flip the switch, but it just throws a spark and flips back."
             if self.clock_in_num > 0:
                 message += "\nIn fact, it has flipped all of the switches back.  Everyone is clocked out."
+            self.clock_in_num = 0
             self.send_message(message)
 
 
@@ -81,6 +84,8 @@ class VendingMachine(Item):
         if not self.world.rooms["Breakroom"].right_unlocked and self.world.player.get_child_by_type(Key) is None:
             if not self.checked:
                 options.append((lambda: self.use(), "Check the vending machine."))
+            else:
+                options.append((lambda: self.use(), "Use the vending machine."))
         return options
 
     def use(self):
@@ -101,7 +106,7 @@ class VendingMachine(Item):
                     ("1", "1"), ("2", "2"), ("3", "3"),
                     ("4", "4"), ("5", "5"), ("6", "6")], False)
                 if letter == "E" and number == "5":
-                    self.world.parent.remove_child(dollar)
+                    self.world.player.remove_child(dollar)
                     Key().set_parent(self.world.player)
                     self.send_message(
                         "You hear cranks turning and then something metalic drop down.\n"
@@ -201,7 +206,7 @@ class Breakroom(Room):
         options = super().get_options()
         options.append(("B", "Go back through the door to the Lobby."))
         options.append(("L", "Go through the left door."))
-        if self.right_checked and self.world.parent.get_child_by_type(Key) is not None:
+        if self.right_checked and self.world.player.get_child_by_type(Key) is not None:
             options.append(("R", "Unlock right door."))
         else:
             options.append(("R", "Go through the right door."))
@@ -220,7 +225,7 @@ class Breakroom(Room):
                     self.send_message("You go through the left door.")
                     self.world.player.set_parent(self.world.rooms["Left"])
                 else:
-                    self.set_world("You try the left door, but it is locked.")
+                    self.send_message("You try the left door, but it is locked.")
             case "R":
                 if self.right_unlocked:
                     self.send_message("You go through the right door.")
@@ -228,18 +233,29 @@ class Breakroom(Room):
                 else:
                     key = self.world.player.get_child_by_type(Key)
                     if self.right_checked and key is not None:
-                        self.world.parent.remove_child(key)
+                        self.world.player.remove_child(key)
                         self.right_unlocked = True
-                        self.set_world("You take the key and unlock the right door.")
+                        self.send_message("You take the key and unlock the right door.")
                     else:
-                        self.set_world("You try the right door, but it is locked.")
+                        self.send_message("You try the right door, but it is locked.")
                     self.right_checked = True
             case "C":
                 if self.central_left_unlocked and self.central_right_unlocked:
                     self.send_message("You go through the center door.")
                     self.world.player.set_parent(self.world.rooms["Central"])
                 else:
-                    self.set_world("You try the center door, but it is locked.")
+                    self.send_message("You try the center door, but it is locked.")
             case "J":
                 Jacket().set_parent(self.world.player)
                 self.send_message("You take the jacket.")
+
+
+from test import test_world
+from player import Player
+from left import Left
+from right import Right
+from giftshop import Dollar
+player = Player("Jeff Smith")
+Dollar().set_parent(player)
+breakroom = Breakroom()
+test_world([breakroom, Left(), Right()], player)

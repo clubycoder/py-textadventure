@@ -287,16 +287,16 @@ class Right(Room):
                 self.world.player.set_parent(self.world.rooms["Breakroom"])
 
 
-from test import test_world
-from player import Player
-from breakroom import Breakroom
-player = Player("Jeff")
-player.favorite_color = "red"
-right = Right()
-piano: Piano = right.get_child_by_type(Piano)
-piano.num_songs_played = 2
-piano.songs_played["M"] = True
-piano.songs_played["T"] = True
+#from test import test_world
+#from player import Player
+#from breakroom import Breakroom
+#player = Player("Jeff")
+#player.favorite_color = "red"
+#right = Right()
+#piano: Piano = right.get_child_by_type(Piano)
+#piano.num_songs_played = 2
+#piano.songs_played["M"] = True
+#piano.songs_played["T"] = True
 #piano.songs_played["C"] = True
-piano.notes_played = "D-D-B-D-E-D-B-B-A-B"
-test_world([right, Breakroom()], player)
+#piano.notes_played = "D-D-B-D-E-D-B-B-A-B"
+#test_world([right, Breakroom()], player)

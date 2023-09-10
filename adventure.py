@@ -27,6 +27,18 @@ class Adventure(World):
     def main(self):
         self.player.send_message((
             "$div"
+            " _____ _\n"
+            "|_   _| |__   ___\n"
+            "  | | | '_ \ / _ \\\n"
+            "  | | | | | |  __/\n"
+            "  |_| |_| |_|\___|\n"
+            " _____          _\n"
+            "|  ___|_ _  ___| |_ ___  _ __ _   _\n"
+            "| |_ / _` |/ __| __/ _ \| '__| | | |\n"
+            "|  _| (_| | (__| || (_) | |  | |_| |\n"
+            "|_|  \__,_|\___|\__\___/|_|   \__, |\n"
+            "                              |___/\n"
+            "$div"
             "Welcome to $room!\n"
             "I say \"Welcome\" out of politeness and habit, "
             "but in all honesty, you shouldn't be here.\n"
