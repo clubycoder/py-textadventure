@@ -1,2 +1,2 @@
-# py-textadventure
-Classic text adventure
+# Classic text adventure
+
