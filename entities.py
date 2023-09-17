@@ -136,6 +136,7 @@ class World(Entity):
 
     def game_over(self, win: bool, message: str):
         self.player.send_message(message)
+        self.player.send_message("You took %s" % (self.player.get_play_time()))
         self.win = win
         self.done = True
 

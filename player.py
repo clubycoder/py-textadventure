@@ -1,10 +1,12 @@
 import typing
+import time
 from entities import Entity
 
 
 class Player(Entity):
     def __init__(self, name: str):
         super().__init__(name)
+        self.start_time = time.monotonic()
         self.favorite_color = ""
         self.age = 0
 
@@ -24,14 +26,29 @@ class Player(Entity):
             print(line)
             #time.sleep(0.5)
 
-    def ask(self, prompt: str, options: list[str] = []) -> str:
+    def get_play_time(self) -> str:
+        duration = time.monotonic() - self.start_time
+        hours = duration // (60 * 60)
+        duration -= hours * (60 * 60)
+        minutes = duration // 60
+        duration -= minutes * 60
+        seconds = int(duration)
+        return "%02d:%02d:%02d" % (hours, minutes, seconds)
+
+    def pause(self):
+        input("[Press <RETURN> to continue...]")
+
+    def ask(self, prompt: str, options: list[str] = [], show_clock=False) -> str:
         response = ""
         good_response = False
         options_lower = []
         for option in options:
             options_lower.append(option.lower())
         while not good_response:
-            response = input(self.prepare_message(prompt) + " > ").strip()
+            clock = ""
+            if show_clock:
+                clock = "-=[%s]=- " % (self.get_play_time())
+            response = input(self.prepare_message(prompt) + clock + ">>> ").strip()
             if len(response) > 0 and (len(options) == 0 or response.lower() in options_lower):
                 good_response = True
         return response
@@ -52,7 +69,8 @@ class Player(Entity):
         prompt += "\n"
         option_num = 1
         option_values = {}
-        for (value, message) in options + self.get_options():
+        #for (value, message) in options + (self.get_options() if include_defaults else []):
+        for (value, message) in options:
             key = ''
             if isinstance(value, str) and len(value) == 1:
                 key = value.lower()
@@ -68,10 +86,10 @@ class Player(Entity):
             prompt += "[quit] To give up.\n"
         done = False
         while not done:
-            response = self.ask(prompt)
+            response = self.ask(prompt, [], include_defaults)
             if response.lower() == "quit":
                 done = True
-                self.world.game_over(False, "Giving up are we?  Well that's one more long term employee of $world.")
+                self.world.game_over(False, "Giving up are we?  Well come back to $world soon.")
             elif response.lower() == "look":
                 self.look()
             elif response.lower().startswith("look at "):

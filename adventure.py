@@ -1,3 +1,6 @@
+import typing
+import os
+import pickle
 from entities import *
 from player import Player
 
@@ -8,6 +11,33 @@ from breakroom import Breakroom
 from left import Left
 from right import Right, colors
 from central import Central
+from playroom import Playroom
+
+
+saved_game_filename = "save.game"
+
+
+def save(world: World):
+    global saved_game_filename
+    f = open(saved_game_filename, "wb")
+    pickle.dump(world, f)
+    f.close()
+
+
+def load() -> typing.Optional[World]:
+    global saved_game_filename
+    if not os.path.isfile(saved_game_filename):
+        return None
+    f = open(saved_game_filename, "rb")
+    world: World = pickle.load(f)
+    f.close()
+    return world
+
+
+def delete():
+    global saved_game_filename
+    if os.path.exists(saved_game_filename):
+        os.remove(saved_game_filename)
 
 
 class Adventure(World):
@@ -17,33 +47,33 @@ class Adventure(World):
         self.player = Player("No name")
         self.player.set_parent(self)
         self.player.set_world(self)
+        self.intro_done = False
+        self.restart = False
         Lobby().set_parent(self)
         GiftShop().set_parent(self)
         Breakroom().set_parent(self)
         Left().set_parent(self)
         Right().set_parent(self)
         Central().set_parent(self)
+        Playroom().set_parent(self)
 
-    def main(self):
+    def intro(self) -> bool:
+        self.intro_done = True
         self.player.send_message((
             "$div"
-            " _____ _\n"
-            "|_   _| |__   ___\n"
-            "  | | | '_ \ / _ \\\n"
-            "  | | | | | |  __/\n"
-            "  |_| |_| |_|\___|\n"
-            " _____          _\n"
-            "|  ___|_ _  ___| |_ ___  _ __ _   _\n"
-            "| |_ / _` |/ __| __/ _ \| '__| | | |\n"
-            "|  _| (_| | (__| || (_) | |  | |_| |\n"
-            "|_|  \__,_|\___|\__\___/|_|   \__, |\n"
+            " _____ _          .oo( )( )o\n"
+            "|_   _| |__   ___          o( )( )o\n"
+            "  | | | '_ \ / _ \\      ┌──┐   o( )( )o\n"
+            "  | | | | | |  __/      │  │         ┌──┐\n"
+            "  |_| |_| |_|\___| ─────┴──┴──┐      │  │\n"
+            " _____          _   ▀   ▀  ▀  │──────┴──┴─┐\n"
+            "|  ___|_ _  ___| |_ ___  _ __ _   _  ▀  ▀ │\n"
+            "| |_ / _` |/ __| __/ _ \| '__| | | |   ▀  │\n"
+            "|  _| (_| | (__| || (_) | |  | |_| |      │\n"
+            "|_|  \__,_|\___|\__\___/|_|   \__, |──────┴────\n"
             "                              |___/\n"
             "$div"
-            "Welcome to $room!\n"
-            "I say \"Welcome\" out of politeness and habit, "
-            "but in all honesty, you shouldn't be here.\n"
-            "People get stuck here.  They cry and lose their minds...."
-            "....well...\n"
+            "Welcome to $room!  Here we try to solve all of the worlds problems.\n"
             "Let's get to know you."
         ))
         self.player.name = self.player.ask("What's your name?")
@@ -67,8 +97,33 @@ class Adventure(World):
             "<DOOR SLAMS BEHIND YOU!>"
         ))
         self.player.set_parent(self.rooms["Lobby"])
+
+    def main(self) -> bool:
+        if not self.intro_done:
+            self.intro()
         while not self.done:
+            save(self)
             self.player.look()
+            if not self.done:
+                self.player.pause()
+        return self.restart
 
 
-Adventure().main()
+world: Adventure = None
+restart = True
+while restart:
+    if world is None:
+        world = load()
+        if world is not None:
+            print("You left off at %s in %s." % (world.player.get_play_time(), world.player.parent.name))
+            if not input("Start where you left off (y or n)? ").strip().lower().startswith("y"):
+                delete()
+                world = None
+        if world is None:
+            world = Adventure()
+    restart = world.main()
+    if world.win:
+        delete()
+    if restart:
+        delete()
+        world = None

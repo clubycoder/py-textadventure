@@ -250,12 +250,12 @@ class Breakroom(Room):
                 self.send_message("You take the jacket.")
 
 
-from test import test_world
-from player import Player
-from left import Left
-from right import Right
-from giftshop import Dollar
-player = Player("Jeff Smith")
-Dollar().set_parent(player)
-breakroom = Breakroom()
-test_world([breakroom, Left(), Right()], player)
+#from test import test_world
+#from player import Player
+#from left import Left
+#from right import Right
+#from giftshop import Dollar
+#player = Player("Jeff Smith")
+#Dollar().set_parent(player)
+#breakroom = Breakroom()
+#test_world([breakroom, Left(), Right()], player)

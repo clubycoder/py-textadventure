@@ -120,7 +120,7 @@ class SignInSheet(Item):
             "The list has:\n"
             " --- Hank Little\n"
             " --- Barbara James\n"
-            " --- Chunk Huitt\n"
+            " --- Chuck Huitt\n"
             " --- Emily Johnson"
         )
         if self.signed:
@@ -176,8 +176,9 @@ class Lobby(Room):
     def handle_option_answer(self, value: str):
         match value:
             case "X":
-                if self.unlocked_left and self.unlocked_right and self.unlocked_central:
-                    self.world.game_over(True, "You've made it out!  I hope you enjoyed your time here.")
+                if self.is_opened:
+                    self.send_message("You walk through the open door and everything goes white!")
+                    self.world.player.set_parent(self.world.rooms["Playroom"])
                 else:
                     self.send_message((
                         "The exit is locked.  You shake the door as hard as you can, but it doesn't open.\n"

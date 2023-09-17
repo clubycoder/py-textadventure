@@ -156,7 +156,10 @@ class Left(Room):
         Computer().set_parent(self)
 
     def get_description(self) -> str:
-        desc = "You are in the Left Wing.  Math symbols and diagrams adorn the walls.  You feel smart being here."
+        desc = "$div"
+        desc += (
+            "You are in the Left Wing.  Math symbols and diagrams adorn the walls.  You feel smart being here."
+        )
         for child in self.children:
             if child.get_visible() and not child.is_a("Player"):
                 child_desc = child.get_description()

@@ -33,7 +33,7 @@ class ColorWheel(Item):
             "  /      \   /      \\\n"
             " / Purple \ / Orange \\\n"
             "/          V          \\\n"
-            "|----------------------|\n"
+            "|---------------------|\n"
             "\\          ^          /\n"
             " \\  Blue  / \\ Yellow /\n"
             "  \\      /   \\      /\n"
@@ -212,48 +212,56 @@ class Piano(Item):
     def get_options(self) -> list[(typing.Union[str, typing.Callable[[], None]], str)]:
         options = []
         if self.num_songs_played < len(self.songs_played.keys()):
-            options.append((lambda: self.play_key(), "Play key on the piano."))
+            options.append((lambda: self.play_key(), "Play the piano."))
         return options
 
     def play_key(self):
         global songs
 
-        if len(self.notes_played) > 0:
-            self.send_message("So far you have played: %s" % (self.notes_played))
-        prompt = (
-            "┌┬──┬──┬─┬┬──┬──┬──┬─┬┬──┬──┬─┬┬──┬──┬──┬─┬─┬┐\n"
-            "││  │  │ ││  │  │  │ ││  │  │ ││  │  │  │ │ ││\n"
-            "││C#│D#│ ││F#│G#│A#│ ││C#│D#│ ││F#│G#│A#│ │ ││\n"
-            "│└─┬┴─┬┘ │└─┬┴─┬┴─┬┘ │└─┬┴─┬┘ │└─┬┴─┬┴─┬┘ │ └┤\n"
-            "│C │D │E │F │G │A │B │C │D │E │F │G │A │B │C │\n"
-            "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
-        )
-        key = self.ask(prompt, [
-            'A', 'B', 'C', 'D', 'E', 'F', 'G',
-            'A#', 'C#', 'D#', 'E#', 'F#', 'G#'
-        ])
-        self.notes_played += ("-" if len(self.notes_played) > 0 else "") + key.upper()
-        for song_id in songs.keys():
-            if songs[song_id]["notes"].startswith(self.notes_played):
-                self.send_message("That sounded nice.")
-                if songs[song_id]["notes"] == self.notes_played:
+        done = False
+        while not done:
+            if len(self.notes_played) > 0:
+                self.send_message("So far you have played: %s" % (self.notes_played))
+            prompt = (
+                "┌┬──┬──┬─┬┬──┬──┬──┬─┬┬──┬──┬─┬┬──┬──┬──┬─┬─┬┐\n"
+                "││  │  │ ││  │  │  │ ││  │  │ ││  │  │  │ │ ││\n"
+                "││C#│D#│ ││F#│G#│A#│ ││C#│D#│ ││F#│G#│A#│ │ ││\n"
+                "│└─┬┴─┬┘ │└─┬┴─┬┴─┬┘ │└─┬┴─┬┘ │└─┬┴─┬┴─┬┘ │ └┤\n"
+                "│C │D │E │F │G │A │B │C │D │E │F │G │A │B │C │\n"
+                "└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘\n"
+            )
+            key = self.ask(prompt, [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G',
+                'A#', 'C#', 'D#', 'E#', 'F#', 'G#',
+                'Q'
+            ])
+            if key.upper() == 'Q':
+                done = True
+            else:
+                self.notes_played += ("-" if len(self.notes_played) > 0 else "") + key.upper()
+                found = False
+                for song_id in songs.keys():
+                    if songs[song_id]["notes"].startswith(self.notes_played):
+                        found = True
+                        self.send_message("That sounded nice.")
+                        if songs[song_id]["notes"] == self.notes_played:
+                            done = True
+                            self.notes_played = ""
+                            self.send_message("Very good! You finished playing %s." % (songs[song_id]["name"]))
+                            if not self.songs_played[song_id]:
+                                self.songs_played[song_id] = True
+                                self.num_songs_played += 1
+                                if self.num_songs_played >= len(self.songs_played.keys()):
+                                    self.parent.get_child_by_type(ColorButtons).active = True
+                                    self.send_message((
+                                        "The last light turns on on the piano.\n"
+                                        "As you played the last note, a row of colored buttons appear on the back wall."
+                                    ))
+                                else:
+                                    self.send_message("Another light turns on on the piano.")
+                if not found:
                     self.notes_played = ""
-                    self.send_message("Very good! You finished playing %s." % (songs[song_id]["name"]))
-                    if not self.songs_played[song_id]:
-                        self.songs_played[song_id] = True
-                        self.num_songs_played += 1
-                        if self.num_songs_played >= len(self.songs_played.keys()):
-                            self.parent.get_child_by_type(ColorButtons).active = True
-                            self.send_message((
-                                "The last light turns on on the piano.\n"
-                                "As you played the last note, a row of colored buttons appear on the back wall."
-                            ))
-                        else:
-                            self.send_message("Another light turns on on the piano.")
-
-                return
-        self.notes_played = ""
-        self.send_message("Ew...that didn't sound right.  You should start over.")
+                    self.send_message("Ew...that didn't sound right.  You should start over.")
 
 
 class Right(Room):
@@ -266,7 +274,11 @@ class Right(Room):
         ColorButtons().set_parent(self)
 
     def get_description(self) -> str:
-        desc = "You are in the Right Wing in a warm and inviting room.  You can feel inspiration and creativity in the air."
+        desc = "$div"
+        desc += (
+            "You are in the Right Wing in a warm and inviting room.  "
+            "You can feel inspiration and creativity in the air."
+        )
         for child in self.children:
             if child.get_visible() and not child.is_a("Player"):
                 child_desc = child.get_description()

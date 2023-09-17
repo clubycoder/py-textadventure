@@ -22,28 +22,28 @@ class HistoryBook(Item):
             ("1", "What is $world"),
             ("2", "The Founders"),
             ("5", "How We Do Things Here"),
-            ("8", "$world Map"),
-            ("9", "On Your Way out?")
+            ("8", "$world Map")
         ]
         chapter = self.ask_option("What chapter do you want to read?", chapters, False)
         message = ""
+        print("Chapter: __%s__" % chapter)
         match chapter:
             case "1":
                 message = (
                     "$world is where we solve problems big or small.  We have a \"unique\" way of doing\n"
                     "things here that has proven to deliver results.\n"
-                    "What do we do here $name?  Well, we create the fut... <INK IS SMUDGED>\n"
+                    "What do we do here $player?  Well, we create the fut... <INK IS SMUDGED>\n"
                     "...an opportunity we don't take lightly."
                 )
             case "2":
-                message = {
+                message = (
                     "$world was founded $age years ago by doctors Mo... <NAME IS SMUDGED> and D.. <NAME IS SMUDGED>.\n"
                     "This was their gift to the world.  An opportunity to make things better.\n"
                     "From it's inception they have nurtured it and watched it grow in the the powerhouse\n"
                     "it is today.\n"
                     "\n"
                     "Sadly 3 years ago...<THE REST IS UNREADABLE>"
-                }
+                )
             case "5":
                 message = (
                     "Here at $world we take on a lot of different problems.  The variety is pretty impressive.\n"
@@ -72,10 +72,6 @@ class HistoryBook(Item):
                     " │ Shop ├──┤         │\n"
                     " │      │  └────┬─┬──┘\n"
                     " └──────┘       └─┘"
-                )
-            case "9":
-                message = (
-                    ""
                 )
         self.world.player.send_message(message)
 

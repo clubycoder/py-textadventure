@@ -3,7 +3,7 @@ from player import Player
 
 
 def test_world(rooms: list[Room], player: Player):
-    world = World("test")
+    world = World("The Factory")
     world.set_world(world)
     world.player = player
     world.player.set_parent(world)
@@ -13,3 +13,4 @@ def test_world(rooms: list[Room], player: Player):
     world.player.set_parent(rooms[0])
     while not world.done:
         world.player.look()
+        world.player.pause()
