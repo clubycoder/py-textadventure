@@ -52,7 +52,7 @@ class ClockInOutBoard(Item):
             self.send_message("You flip the switch and clock in %s" % (employee))
             if self.clock_in_num >= len(self.clock_in_order):
                 self.world.rooms["Breakroom"].left_unlocked = True
-                self.send_message("\n<YOU HEAR LOAD CLICK TO THE LEFT>")
+                self.send_message("\n<YOU HEAR LOUD CLICK TO THE LEFT>")
         else:
             for employee in self.clocked_in.keys():
                 self.clocked_in[employee] = False
@@ -198,7 +198,13 @@ class Breakroom(Room):
                 if len(child_desc) > 0:
                     desc += "\n" + child_desc
         desc += "\nThere are doors to the left and to the right.\n"
-        desc += "\nThere is also a door in the center of the back wall.\n"
+        desc += "\nThere is also a door in the center of the back wall.  "
+        if self.central_left_unlocked and self.central_right_unlocked:
+            desc += "The center door has 2 green check on it."
+        elif self.central_left_unlocked and self.central_right_unlocked:
+            desc += "The center door has 1 red X's and 1 green check on it."
+        else:
+            desc += "The center door has 2 red X's on it."
 
         return desc
 

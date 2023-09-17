@@ -1,6 +1,49 @@
 from entities import *
 
 
+class Notepad(Item):
+    def __init__(self, name="Notepad"):
+        super().__init__(name)
+        self.notes: list[str] = []
+
+    def get_description(self) -> str:
+        if self.parent == self.world.player:
+            return "You have a small notebook and pen."
+        return "A small notepad and pen is sitting on a chair."
+
+    def get_options(self) -> list[(typing.Union[str, typing.Callable[[], None]], str)]:
+        options = []
+        if self.parent == self.world.player:
+            options.append((lambda: self.take_note(), "Take a note in the notepad."))
+            if len(self.notes) > 0:
+                options.append((lambda: self.read_notes(), "Read your notes."))
+        else:
+            options.append((lambda: self.take(), "Take the notepad and pen."))
+        return options
+
+    def take(self):
+        self.set_parent(self.world.player)
+        self.send_message("You grab the notepad and pen.")
+
+    def take_note(self):
+        note = self.ask("Take a note. ")
+        if len(note.strip()) > 0:
+            self.notes.append(note)
+
+    def read_notes(self):
+        note_num = 0
+        while note_num < len(self.notes):
+            message = ""
+            count = 0
+            while note_num < len(self.notes) and count < 15:
+                message += self.notes[note_num] + "\n"
+                note_num += 1
+                count += 1
+            self.send_message(message)
+            if note_num < len(self.notes):
+                self.world.player.pause()
+
+
 class Telephone(Item):
     def __init__(self, name="Telephone"):
         super().__init__(name)
@@ -89,7 +132,7 @@ class TicketMachine(Item):
     def use(self):
         self.broken = True
         self.send_message((
-            "You take the next ticket from the machine.\n"
+            "You take the next ticket from the machine.  Looks like you are E5.\n"
             "The machine falls apart on the counter and kicks up a cloud of dust.\n"
             "At least you have a ticket now.  Anyone else that shows up is out of luck."
         ))
@@ -135,6 +178,7 @@ class Lobby(Room):
     def __init__(self, name="Lobby"):
         super().__init__(name)
         self.is_opened = False
+        Notepad().set_parent(self)
         Telephone().set_parent(self)
         TicketMachine().set_parent(self)
         SignInSheet().set_parent(self)

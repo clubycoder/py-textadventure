@@ -36,7 +36,7 @@ class Player(Entity):
         return "%02d:%02d:%02d" % (hours, minutes, seconds)
 
     def pause(self):
-        input("[Press <RETURN> to continue...]")
+        input("[Press <RETURN or ENTER> to continue...]")
 
     def ask(self, prompt: str, options: list[str] = [], show_clock=False) -> str:
         response = ""

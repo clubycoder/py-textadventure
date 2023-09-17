@@ -112,7 +112,7 @@ class CashRegister(Item):
 
     def take_money(self):
         self.money_taken = True
-        self.world.player.send_message("You press a button and open the cash register.  There is a collar in it.")
+        self.world.player.send_message("You take the dollar.")
         Dollar().set_parent(self.world.player)
 
 
