@@ -104,8 +104,7 @@ class Adventure(World):
         while not self.done:
             save(self)
             self.player.look()
-            if not self.done:
-                self.player.pause()
+            self.player.pause()
         return self.restart
 
 
